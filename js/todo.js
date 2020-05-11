@@ -6,10 +6,13 @@ function renderList(list) {
     for (let i = 0; i < list.length; i++) {
         const todoItem = list[i];
         HTML += `
-            <div class="item">
+           <div class="item">
                 <div class="status ${todoItem.status}"></div>
                 <p class="description">${todoItem.description}</p>
                 <div class="deadline">${todoItem.deadline}</div>
+                <div class="actions">
+                    <div class="action remove">Remove</div>
+                </div>
             </div>`;
     }
     return listPlace.innerHTML += HTML;
