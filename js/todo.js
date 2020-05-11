@@ -18,4 +18,38 @@ function renderList(list) {
     return listPlace.innerHTML += HTML;
 }
 
+//-----Bendras turinys------------
+
 renderList(todo_list); 
+
+
+//----- Vieno ToDo pasalinimas---------
+
+const removeActions = document.querySelectorAll('.item .action.remove');
+
+for (let i = 0; i < removeActions.length; i++) {
+    const removeElement = removeActions[i];
+    removeElement.addEventListener('click', actionRemoveTodoItem);
+}
+
+function actionRemoveTodoItem(event) {
+    const parentItem = event.target.closest('.item');
+    parentItem.remove();
+}
+
+
+//-------Viso saraso pasalinimas---------
+
+const BTNremoveAll = document.querySelector('.global-actions > .action.remove');
+
+BTNremoveAll.addEventListener('click', actionRemoveAllTodoItems);
+
+function actionRemoveAllTodoItems(event) {
+    const allTodoItems = event.target
+        .closest('.container')
+        .querySelectorAll('.item');
+
+    for (let i = 0; i < allTodoItems.length; i++) {
+        allTodoItems[i].remove();
+    }
+}
