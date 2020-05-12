@@ -15,7 +15,7 @@ function renderList(list) {
                 </div>
             </div>`;
     }
-    return listPlace.innerHTML += HTML;
+    return listPlace.insertAdjacentHTML('beforeend', HTML);
 }
 
 //-----Bendras turinys------------
@@ -94,6 +94,7 @@ function addNewTodoItem() {
 
     todo_list.push(newTodo);
 
+    renderList(todo_list);
     return;
 }
 
