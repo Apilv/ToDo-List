@@ -1,5 +1,8 @@
 "use strict";
 
+let todo_id = 0;
+let todo_list = [];
+
 const DOMcontainer = document.querySelector('.container');
 
 const DOMglobals = DOMcontainer.querySelector('.global-actions');
@@ -104,11 +107,11 @@ function removeTodo(todoIndex) {
     }
 
     todo_list = leftTodos;
+    updateMemory();
     return;
 }
 
 function createNewTodo() {
-    todo_id++;
     let newTodo = {
         id: todo_id,
         description: DOMtaskTextarea.value.trim(),
@@ -128,7 +131,34 @@ function createNewTodo() {
 
     todo_list.push(newTodo);
     renderTodoItem(newTodo);
+    todo_id++;
+    updateMemory();
 }
+
+/*******************************
+    MEMORY MANAGEMENT
+*******************************/
+
+function memoryManagement() {
+    if (localStorage.getItem('todo_id')) {
+        todo_id = JSON.parse(localStorage.getItem('todo_id'));
+    } else {
+        localStorage.setItem('todo_id', JSON.stringify(todo_id));
+    }
+
+
+    if (localStorage.getItem('todo_list')) {
+        todo_list = JSON.parse(localStorage.getItem('todo_list'));
+    } else {
+        localStorage.setItem('todo_list', JSON.stringify(todo_list));
+    }
+}
+function updateMemory() {
+    localStorage.setItem('todo_id', JSON.stringify(todo_id));
+    localStorage.setItem('todo_list', JSON.stringify(todo_list));
+}
+
+memoryManagement();
 
 /*******************************
     GENERATE CONTENT
@@ -141,6 +171,5 @@ DOMdeadlineInput.value = formatedDate(86400000);
     INIT ACTIONS
 *******************************/
 
-BTNremoveAll.addEventListener('click', removeAllTodos);
 DOMformAdd.addEventListener('click', createNewTodo)
-console.log('sudekIrAtimk:', sudekIrAtimk(4, 6, 3));
+BTNremoveAll.addEventListener('click', removeAllTodos);
