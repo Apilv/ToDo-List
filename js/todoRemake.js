@@ -21,8 +21,9 @@ function renderList(list) {
 }
 
 function renderTodoItem(data) {
+    const id = 'todo_' + data.id;
     const HTML = `
-        <div class="item">
+        <div class="item" id="${id}">
             <div class="status ${data.status}"></div>
             <p class="description">${data.description}</p>
             <div class="deadline">${data.deadline}</div>
@@ -33,6 +34,24 @@ function renderTodoItem(data) {
 
     DOMcontainer.insertAdjacentHTML('beforeend', HTML);
     DOMitems = DOMcontainer.querySelectorAll('.item');
+
+    const item = DOMcontainer.querySelector('#' + id);
+
+    // registruojame event listener'i
+    item.querySelector('.action.remove')
+        .addEventListener('click', () => {
+            let currentlyAddedItemIndex = 0;
+
+            // randu kelintas siuo metu sarase yra norimas mano TODO item
+            for (let i = 0; i < DOMitems.length; i++) {
+                if (DOMitems[i].id === id) {
+                    currentlyAddedItemIndex = i;
+                    break;
+                }
+            }
+
+            removeTodo(currentlyAddedItemIndex);
+        });
     return;
 }
 
@@ -72,30 +91,61 @@ function removeAllTodos() {
 }
 
 function removeTodo(todoIndex) {
-    // istrinti darba is DOM
+    // remove item from DOM
     DOMitems[todoIndex].remove();
     DOMitems = DOMcontainer.querySelectorAll('.item');
 
-    // istrinti darba is todo_list (global variable)
+    // remove item from todo_list (global variable)
     let leftTodos = [];
     for (let i = 0; i < todo_list.length; i++) {
         if (i !== todoIndex) {
             leftTodos.push(todo_list[i]);
         }
     }
+
     todo_list = leftTodos;
     return;
 }
 
-/*-------------------------
-    Turinio Generavimas
--------------------------*/
+/*******************************
+    GENERATE CONTENT
+*******************************/
 renderList(todo_list);
 
 DOMdeadlineInput.value = formatedDate(86400000);
 
-/*-------------------------
-    Veiksmo Aktyvavimas
--------------------------*/
+/*******************************
+    INIT ACTIONS
+*******************************/
 
 BTNremoveAll.addEventListener('click', removeAllTodos);
+
+
+
+
+
+function suma(a, b) {
+    return a + b;
+}
+console.log('function suma:', suma(2, 5));
+
+
+const atimtis = function (a, b) {
+    return a - b;
+}
+console.log('bevarde funkcija atimtis:', atimtis(8, 3));
+
+
+// const daugyba = function(a, b) { return a*b; }
+const daugyba = (a, b) => a * b;
+console.log('arrow function daugyba:', daugyba(3, 16));
+
+
+// don't try this at home :(
+const sudekIrAtimk = (a, b, c) => {
+    const sudek = (e, f) => e + f;
+    const atimk = (g, h) => g - h;
+
+    return atimk(sudek(a, b), c);
+};
+console.log('sudekIrAtimk:', sudekIrAtimk(4, 6, 3));
