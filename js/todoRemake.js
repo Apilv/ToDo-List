@@ -27,7 +27,7 @@ function renderList(list) {
 function renderTodoItem(data) {
     const id = 'todo_' + data.id;
     const HTML = `
-        <div class="item" id="${id}">
+        <div class="item" id="${id}" data-task-id="${data.id}">
             <div class="status ${data.status}"></div>
             <p class="description">${data.description}</p>
             <div class="deadline">${data.deadline}</div>
@@ -60,134 +60,201 @@ function renderTodoItem(data) {
 
     item.querySelector('.action.edit')
         .addEventListener('click', () => {
+            DOMcontainer.classList.add('editing');
             DOMform.classList.add('editing');
+            populateEditingForm(data.id);
         });
     return;
 }
 
-function formatedDate(deltaTime = 0) {
-    let now = new Date();
-
-    if (deltaTime !== 0) {
-        now = new Date(Date.now() + deltaTime);
-    }
-
-    let minutes = now.getMinutes();
-    let hours = now.getHours();
-    let days = now.getDate();
-    let month = now.getMonth() + 1;
-    const year = now.getFullYear();
-
-    if (minutes < 10) {
-        minutes = '0' + minutes;
-    }
-    if (hours < 10) {
-        hours = '0' + hours;
-    }
-    if (days < 10) {
-        days = '0' + days;
-    }
-    if (month < 10) {
-        month = '0' + month;
-    }
-
-    return year + '-' + month + '-' + days + ' ' + hours + ':' + minutes;
-}
-
-function removeAllTodos() {
-    for (let i = DOMitems.length-1; i >= 0; i--) {
-        removeTodo(i);
-    }
-}
-
-function removeTodo(todoIndex) {
-    // remove item from DOM
-    DOMitems[todoIndex].remove();
-    DOMitems = DOMcontainer.querySelectorAll('.item');
-
-    // remove item from todo_list (global variable)
-    let leftTodos = [];
-    for (let i = 0; i < todo_list.length; i++) {
-        if (i !== todoIndex) {
-            leftTodos.push(todo_list[i]);
+function populateEditingForm(id) {
+    let task = {};
+    let i = 0;
+    for (; i < todo_list.length; i++) {
+        if (todo_list[i].id === id) {
+            task = todo_list[i];
+            break;
         }
     }
 
-    todo_list = leftTodos;
-    updateMemory();
-    return;
+    DOMform.setAttribute('data-task-index', i);
+    DOMtaskTextarea.value = task.description;
+    DOMdeadlineInput.value = task.deadline;
+    DOMswitchStatus.setAttribute('data-selected', task.status);
 }
+    function formatedDate(deltaTime = 0) {
+        let now = new Date();
 
-function createNewTodo() {
-    let newTodo = {
-        id: todo_id,
-        description: DOMtaskTextarea.value.trim(),
-        created_on: formatedDate(),
-        deadline: DOMdeadlineInput.value.trim(),
-        status: 'todo'
-    };
+        if (deltaTime !== 0) {
+            now = new Date(Date.now() + deltaTime);
+        }
 
-    if (newTodo.description.length === 0) {
-        return alert('ERROR: tuscias aprasymas');
+        let minutes = now.getMinutes();
+        let hours = now.getHours();
+        let days = now.getDate();
+        let month = now.getMonth() + 1;
+        const year = now.getFullYear();
+
+        if (minutes < 10) {
+            minutes = '0' + minutes;
+        }
+        if (hours < 10) {
+            hours = '0' + hours;
+        }
+        if (days < 10) {
+            days = '0' + days;
+        }
+        if (month < 10) {
+            month = '0' + month;
+        }
+
+        return year + '-' + month + '-' + days + ' ' + hours + ':' + minutes;
     }
 
-    if (newTodo.deadline.length > 0 &&
-        (new Date(newTodo.deadline)).toString() === 'Invalid Date') {
-        return alert('ERROR: nevalidus deadline');
+    function removeAllTodos() {
+        for (let i = DOMitems.length - 1; i >= 0; i--) {
+            removeTodo(i);
+        }
     }
 
-    todo_list.push(newTodo);
-    renderTodoItem(newTodo);
-    todo_id++;
-    updateMemory();
-}
+    function removeTodo(todoIndex) {
+        // remove item from DOM
+        DOMitems[todoIndex].remove();
+        DOMitems = DOMcontainer.querySelectorAll('.item');
 
-function updateSwitch(event) {
-    const value = event.target.dataset.option;
-    event.target.parentElement.setAttribute('data-selected', value);
-}
+        // remove item from todo_list (global variable)
+        let leftTodos = [];
+        for (let i = 0; i < todo_list.length; i++) {
+            if (i !== todoIndex) {
+                leftTodos.push(todo_list[i]);
+            }
+        }
 
-/*******************************
-    MEMORY MANAGEMENT
-*******************************/
+        todo_list = leftTodos;
+        updateMemory();
+        return;
+    }
 
-function memoryManagement() {
-    if (localStorage.getItem('todo_id')) {
-        todo_id = JSON.parse(localStorage.getItem('todo_id'));
-    } else {
+    function createNewTodo() {
+        let newTodo = {
+            id: todo_id,
+            created_on: formatedDate(),
+            description: DOMtaskTextarea.value.trim(),
+            deadline: DOMdeadlineInput.value.trim(),
+            status: 'todo'
+        };
+
+        if (newTodo.description.length === 0) {
+            return alert('ERROR: tuscias aprasymas');
+        }
+
+        if (newTodo.deadline.length > 0 &&
+            (new Date(newTodo.deadline)).toString() === 'Invalid Date') {
+            return alert('ERROR: nevalidus deadline');
+        }
+
+        todo_list.push(newTodo);
+        renderTodoItem(newTodo);
+        todo_id++;
+        updateMemory();
+    }
+
+    function updateTaskInfo() {
+        const index = parseInt(DOMform.dataset.taskIndex);
+        const description = DOMtaskTextarea.value;
+        const deadline = DOMdeadlineInput.value;
+        const status = DOMswitchStatus.dataset.selected;
+
+        if (description.length === 0) {
+            return alert('ERROR: tuscias aprasymas');
+        }
+
+        if (deadline.length > 0 &&
+            (new Date(deadline)).toString() === 'Invalid Date') {
+            return alert('ERROR: nevalidus deadline');
+        }
+
+        todo_list[index].description = description;
+        todo_list[index].deadline = deadline;
+        todo_list[index].status = status;
+
+        updateMemory();
+
+        // update HTML
+        const task_id = '#todo_' + todo_list[index].id;
+        const DOMtask = DOMcontainer.querySelector(task_id);
+        DOMtask.querySelector('.description').innerText = description;
+        DOMtask.querySelector('.deadline').innerText = deadline;
+        const DOMstatus = DOMtask.querySelector('.status');
+        DOMstatus.classList.remove('todo', 'progress', 'done');
+        DOMstatus.classList.add(status);
+    }
+
+    function clearForm() {
+        DOMtaskTextarea.value = '';
+        DOMswitchStatus.setAttribute('data-selected', 'todo');
+        DOMdeadlineInput.value = formatedDate(86400000);
+        DOMcontainer.classList.remove('editing');
+        DOMform.classList.remove('editing');
+    }
+
+    function updateSwitch(event) {
+        const value = event.target.dataset.option;
+        event.target.parentElement.setAttribute('data-selected', value);
+    }
+
+    /*******************************
+        MEMORY MANAGEMENT
+    *******************************/
+
+    function memoryManagement() {
+        if (localStorage.getItem('todo_id')) {
+            todo_id = JSON.parse(localStorage.getItem('todo_id'));
+        } else {
+            localStorage.setItem('todo_id', JSON.stringify(todo_id));
+        }
+
+
+        if (localStorage.getItem('todo_list')) {
+            todo_list = JSON.parse(localStorage.getItem('todo_list'));
+        } else {
+            localStorage.setItem('todo_list', JSON.stringify(todo_list));
+        }
+    }
+
+    function updateMemory() {
         localStorage.setItem('todo_id', JSON.stringify(todo_id));
-    }
-
-
-    if (localStorage.getItem('todo_list')) {
-        todo_list = JSON.parse(localStorage.getItem('todo_list'));
-    } else {
         localStorage.setItem('todo_list', JSON.stringify(todo_list));
     }
-}
-function updateMemory() {
-    localStorage.setItem('todo_id', JSON.stringify(todo_id));
-    localStorage.setItem('todo_list', JSON.stringify(todo_list));
-}
 
-memoryManagement();
+    memoryManagement();
 
-/*******************************
-    GENERATE CONTENT
-*******************************/
-renderList(todo_list);
+    /*******************************
+        GENERATE CONTENT
+    *******************************/
+    renderList(todo_list);
 
-DOMdeadlineInput.value = formatedDate(86400000);
+    DOMdeadlineInput.value = formatedDate(86400000);
 
-/*******************************
-    INIT ACTIONS
-*******************************/
+    /*******************************
+        INIT ACTIONS
+    *******************************/
 
-DOMformAdd.addEventListener('click', createNewTodo)
+    DOMformAdd.addEventListener('click', () => {
+        createNewTodo();
+        clearForm();
+    });
 
-DOMswitchStatus.addEventListener('click', updateSwitch);
-DOMformCancel.addEventListener('click', () => {
-    DOMform.classList.remove('editing');
-})
+    DOMformClear.addEventListener('click', clearForm);
 
-BTNremoveAll.addEventListener('click', removeAllTodos);
+    DOMswitchStatus.addEventListener('click', updateSwitch);
+    DOMformSave.addEventListener('click', () => {
+        updateTaskInfo();
+        clearForm();
+    });
+
+    DOMformCancel.addEventListener('click', () => {
+        clearForm();
+    })
+
+    BTNremoveAll.addEventListener('click', removeAllTodos);
